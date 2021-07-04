@@ -1,5 +1,8 @@
 import axios from 'axios';
 import { JSDOM } from 'jsdom';
+import sgMail from '@sendgrid/mail';
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 let ddtechData = '';
 let requestingDdtech = false;
@@ -7,6 +10,7 @@ let pcelData = '';
 let requestingPcel = false;
 let cyberpuertaData = '';
 let requestingCyberpuerta = false;
+let counter = 0;
 
 async function checkDdtech() {
     if (!requestingDdtech) {
@@ -21,9 +25,10 @@ async function checkDdtech() {
             const price = element.querySelector('.product-info .product-price .price').textContent;
             data += ('\n\n' + name + ' ' + price);
         });
-        if (ddtechData !== data) {
+        if (ddtechData.replace(/ /g, '') !== data.replace(/ /g, '')) {
             ddtechData = data;
             console.log(ddtechData);
+            await sendEmail(ddtechData, 'ddtech');
         }
     }
 }
@@ -46,6 +51,7 @@ async function checkPcel() {
         if (pcelData !== data) {
             pcelData = data;
             console.log(pcelData);
+            await sendEmail(pcelData, 'pcel');
         }
     }
 }
@@ -53,7 +59,7 @@ async function checkPcel() {
 async function checkCyberpuerta() {
     if (!requestingCyberpuerta) {
         requestingCyberpuerta = true;
-        const response = await axios.get('https://www.cyberpuerta.mx/Computo-Hardware/Componentes/Tarjetas-de-Video/Filtro/Procesador-grafico/NVIDIA-GeForce-RTX-3070/Estatus/En-existencia/Procesador-grafico/NVIDIA-GeForce-RTX-2060/', { headers: { 'cookie': 'display=list; collapse_attribute_5849=true; collapse_attribute_5855=true; collapse_attribute_6895=true; collapse_attribute_5939=true; collapse_price=true; collapse_attribute_5659=true; collapse_attribute_6407=true; collapse_attribute_6415=true; PCELSESS2=kslp3dv3srnoluo3peep4noe8h; display=list; collapse_attribute_5659=true; collapse_attribute_6407=true; collapse_attribute_6415=true; collapse_price=true; language=es; currency=MXN' } });
+        const response = await axios.get('https://www.cyberpuerta.mx/Computo-Hardware/Componentes/Tarjetas-de-Video/Filtro/Procesador-grafico/NVIDIA-GeForce-RTX-3070/Estatus/En-existencia/');
         requestingCyberpuerta = false;
         const dom = new JSDOM(response.data);
         const document = dom.window.document;
@@ -69,6 +75,27 @@ async function checkCyberpuerta() {
         if (cyberpuertaData !== data) {
             cyberpuertaData = data;
             console.log(cyberpuertaData);
+            await sendEmail(cyberpuertaData, 'cyberpuerta');
+        }
+    }
+}
+
+async function sendEmail(data, type) {
+    counter += 1;
+    const msg = {
+        to: 'car5009600@gmail.com',
+        from: 'car_092@hotmail.com',
+        subject: 'Chartela update ' + type + ' ' + counter,
+        text: data
+    };
+
+    try {
+        await sgMail.send(msg);
+        console.log('sent')
+    } catch (error) {
+        console.error(error);
+        if (error.response) {
+            console.error(error.response.body)
         }
     }
 }
@@ -83,4 +110,4 @@ setInterval(async () => {
     console.log('<<<<<<<<<< Cyberpuerta');
     await checkCyberpuerta();
     console.log('>>>>>>>>>> Cyberpuerta');
-}, 5000);
+}, 30000);
