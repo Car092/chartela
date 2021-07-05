@@ -12,6 +12,12 @@ let cyberpuertaData = '';
 let requestingCyberpuerta = false;
 let counter = 0;
 
+function charContentChanged(string1, string2){
+    const base1 = Array.from(string1.replace(/ /g, '')).sort().join();
+    const base2 = Array.from(string2.replace(/ /g, '')).sort().join();
+    return base1 !== base2;
+}
+
 async function checkDdtech() {
     if (!requestingDdtech) {
         requestingDdtech = true;
@@ -25,7 +31,7 @@ async function checkDdtech() {
             const price = element.querySelector('.product-info .product-price .price').textContent;
             data += ('\n\n' + name + ' ' + price);
         });
-        if (ddtechData.replace(/ /g, '') !== data.replace(/ /g, '')) {
+        if (charContentChanged(ddtechData, data)) {
             ddtechData = data;
             console.log(ddtechData);
             await sendEmail(ddtechData, 'ddtech');
@@ -48,7 +54,7 @@ async function checkPcel() {
                 data += ('\n' + name.textContent + '\n' + price.textContent);
             }
         });
-        if (pcelData !== data) {
+        if (charContentChanged(pcelData, data)) {
             pcelData = data;
             console.log(pcelData);
             await sendEmail(pcelData, 'pcel');
@@ -72,7 +78,7 @@ async function checkCyberpuerta() {
                 data += (name.textContent + price.textContent);
             }
         });
-        if (cyberpuertaData !== data) {
+        if (charContentChanged(cyberpuertaData, data)) {
             cyberpuertaData = data;
             console.log(cyberpuertaData);
             await sendEmail(cyberpuertaData, 'cyberpuerta');
