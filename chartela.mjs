@@ -88,6 +88,9 @@ async function checkCyberpuerta() {
 
 async function sendEmail(data, type) {
     counter += 1;
+    if(!data){
+        data = "No chartelas";
+    }
     const msg = {
         to: 'car5009600@gmail.com',
         from: 'car_092@hotmail.com',
@@ -116,4 +119,4 @@ setInterval(async () => {
     console.log('<<<<<<<<<< Cyberpuerta');
     await checkCyberpuerta();
     console.log('>>>>>>>>>> Cyberpuerta');
-}, 30000);
+}, 120000);
