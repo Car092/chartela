@@ -49,7 +49,10 @@ async function checkPcel() {
         let data = '';
         document.querySelectorAll('.product-list table tr').forEach(element => {
             const name = element.querySelector('.name a');
-            const price = element.querySelector('.price .price-new');
+            let price = element.querySelector('.price .price-new');
+            if(!price){
+                price = element.querySelector('.price');
+            }
             if (name && price) {
                 data += ('\n' + name.textContent + '\n' + price.textContent);
             }
