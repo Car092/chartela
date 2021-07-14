@@ -10,9 +10,11 @@ let pcelData = '';
 let requestingPcel = false;
 let cyberpuertaData = '';
 let requestingCyberpuerta = false;
+let zegucomData = '';
+let requestingZegucom = false;
 let counter = 0;
 
-function charContentChanged(string1, string2){
+function charContentChanged(string1, string2) {
     const base1 = Array.from(string1.replace(/ /g, '')).sort().join();
     const base2 = Array.from(string2.replace(/ /g, '')).sort().join();
     return base1 !== base2;
@@ -50,7 +52,7 @@ async function checkPcel() {
         document.querySelectorAll('.product-list table tr').forEach(element => {
             const name = element.querySelector('.name a');
             let price = element.querySelector('.price .price-new');
-            if(!price){
+            if (!price) {
                 price = element.querySelector('.price');
             }
             if (name && price) {
@@ -89,9 +91,41 @@ async function checkCyberpuerta() {
     }
 }
 
+async function checkZegucom() {
+    if (!requestingZegucom) {
+        requestingZegucom = true;
+        const response = await axios.get("https://www.zegucom.com.mx/index.php?mod=search&fam=TV&sub=PCI&marca=AU");
+        requestingZegucom = false;
+        const dom = new JSDOM(response.data);
+        const document = dom.window.document;
+        let data = '';
+        document.querySelectorAll('.search-results .search-result').forEach(element => {
+            const name = element.querySelector('.result-description a').textContent.trim();
+            const price = element.querySelector('.result-price-search').textContent.trim();
+            if (hasWord('strix', name) && hasWord('3070', name)) {
+                data += ('\n\n' + name + ' \n' + price);
+            }
+        });
+        console.log(data);
+        if (charContentChanged(zegucomData, data)) {
+            zegucomData = data;
+            await sendEmail(zegucomData, 'zegucom');
+        }
+    }
+}
+
+function hasWord(word, title) {
+    const wordLowercase = word.toLowerCase();
+    const titleLowercase = title.toLowerCase();
+    if (titleLowercase.includes(wordLowercase)) {
+        return true;
+    }
+    return false;
+}
+
 async function sendEmail(data, type) {
     counter += 1;
-    if(!data){
+    if (!data) {
         data = "No chartelas";
     }
     const msg = {
@@ -122,4 +156,7 @@ setInterval(async () => {
     console.log('<<<<<<<<<< Cyberpuerta');
     await checkCyberpuerta();
     console.log('>>>>>>>>>> Cyberpuerta');
+    console.log('<<<<<<<<<< Zegucom');
+    await checkZegucom();
+    console.log('>>>>>>>>>> Zegucom');
 }, 120000);
