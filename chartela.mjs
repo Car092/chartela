@@ -29,13 +29,15 @@ async function checkDdtech() {
         const document = dom.window.document;
         let data = '';
         document.querySelectorAll('.product').forEach(element => {
-            const name = element.querySelector('.product-info .name a').textContent;
-            const price = element.querySelector('.product-info .product-price .price').textContent;
+            const name = element.querySelector('.product-info .name a').textContent.trim();
+            const price = element.querySelector('.product-info .product-price .price').textContent.trim();
             data += ('\n\n' + name + ' ' + price);
         });
         if (charContentChanged(ddtechData, data)) {
             ddtechData = data;
+            console.log('ddtech, ' + new Date());
             console.log(ddtechData);
+            console.log('>');
             await sendEmail(ddtechData, 'ddtech');
         }
     }
@@ -56,12 +58,14 @@ async function checkPcel() {
                 price = element.querySelector('.price');
             }
             if (name && price) {
-                data += ('\n' + name.textContent + '\n' + price.textContent);
+                data += ('\n\n' + name.textContent.trim() + '\n' + price.textContent.trim());
             }
         });
         if (charContentChanged(pcelData, data)) {
             pcelData = data;
+            console.log('pcel, ' + new Date());
             console.log(pcelData);
+            console.log('>');
             await sendEmail(pcelData, 'pcel');
         }
     }
@@ -80,12 +84,14 @@ async function checkCyberpuerta() {
             const name = element.querySelector('.emproduct_right_title');
             const price = element.querySelector('.price');
             if (name && price) {
-                data += (name.textContent + price.textContent);
+                data += ('\n\n' + name.textContent.trim() + '\n' + price.textContent.trim());
             }
         });
         if (charContentChanged(cyberpuertaData, data)) {
             cyberpuertaData = data;
+            console.log('cyberpuerta, ' + new Date());
             console.log(cyberpuertaData);
+            console.log('>');
             await sendEmail(cyberpuertaData, 'cyberpuerta');
         }
     }
@@ -106,9 +112,11 @@ async function checkZegucom() {
                 data += ('\n\n' + name + ' \n' + price);
             }
         });
-        console.log(data);
         if (charContentChanged(zegucomData, data)) {
             zegucomData = data;
+            console.log('zegucom, ' + new Date());
+            console.log(zegucomData);
+            console.log('>');
             await sendEmail(zegucomData, 'zegucom');
         }
     }
@@ -137,7 +145,6 @@ async function sendEmail(data, type) {
 
     try {
         await sgMail.send(msg);
-        console.log('sent')
     } catch (error) {
         console.error(error);
         if (error.response) {
@@ -147,16 +154,8 @@ async function sendEmail(data, type) {
 }
 
 setInterval(async () => {
-    console.log('<<<<<<<<<< DDTech');
     await checkDdtech();
-    console.log('>>>>>>>>>> DDTech');
-    console.log('<<<<<<<<<< Pcel');
     await checkPcel();
-    console.log('>>>>>>>>>> Pcel');
-    console.log('<<<<<<<<<< Cyberpuerta');
     await checkCyberpuerta();
-    console.log('>>>>>>>>>> Cyberpuerta');
-    console.log('<<<<<<<<<< Zegucom');
     await checkZegucom();
-    console.log('>>>>>>>>>> Zegucom');
 }, 120000);
