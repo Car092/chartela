@@ -106,8 +106,8 @@ async function checkZegucom() {
         const document = dom.window.document;
         let data = '';
         document.querySelectorAll('.search-results .search-result').forEach(element => {
-            const name = element.querySelector('.result-description a').textContent.trim();
-            const price = element.querySelector('.result-price-search').textContent.trim();
+            const name = element.querySelector('.result-description a')?.textContent?.trim();
+            const price = element.querySelector('.result-price-search')?.textContent?.trim();
             if (hasWord('strix', name) && hasWord('3070', name)) {
                 data += ('\n\n' + name + ' \n' + price);
             }
@@ -154,8 +154,13 @@ async function sendEmail(data, type) {
 }
 
 setInterval(async () => {
-    await checkDdtech();
-    await checkPcel();
-    await checkCyberpuerta();
-    await checkZegucom();
+    try {
+        await checkDdtech();
+        await checkPcel();
+        await checkCyberpuerta();
+        await checkZegucom();
+    }
+    catch (e) {
+        console.log('Caught exception in main loop: ', e);
+    }
 }, 120000);
